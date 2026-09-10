@@ -1,0 +1,12 @@
+strada_high = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-milan-1.oraclecloud.com))(connect_data=(service_name=gbc93d6fc8cab33_strada_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+strada_medium = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-milan-1.oraclecloud.com))(connect_data=(service_name=gbc93d6fc8cab33_strada_medium.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+strada_low = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-milan-1.oraclecloud.com))(connect_data=(service_name=gbc93d6fc8cab33_strada_low.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+strada_tp = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-milan-1.oraclecloud.com))(connect_data=(service_name=gbc93d6fc8cab33_strada_tp.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+strada_tpurgent = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-milan-1.oraclecloud.com))(connect_data=(service_name=gbc93d6fc8cab33_strada_tpurgent.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+
+

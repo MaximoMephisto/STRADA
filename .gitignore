@@ -4,3 +4,7 @@
 # Ignora i file temporanei di Python
 __pycache__/
 *.pyc
+
+# Ignora i file di configurazione locali
+.venv/
+.vscode/
