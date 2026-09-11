@@ -2,7 +2,7 @@
 import os
 import oracledb
 
-def connesione_al_db():
+def connessione_al_db():
     try:
         USER = "admin"
         PASSWORD = "P12345678910strada."
@@ -29,4 +29,5 @@ def connesione_al_db():
         print("Errore durante la connessione al database:", e)
         return None
 
-conessione = connesione_al_db()
+if __name__  == "__main__":
+    connessione = connessione_al_db()
