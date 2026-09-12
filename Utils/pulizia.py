@@ -113,7 +113,8 @@ def vehicle_collision_pulizia(dataset):
     )
 
     df = df.drop(columns=["LOCATION"])
-            
+    df = df.drop_duplicates(subset=['COLLISION_ID'], keep='first')
+    
     df.to_csv(dataset_output, index=False)
     
     tempo_fine = timer()
@@ -255,7 +256,7 @@ if __name__ == "__main__":
     print(f"{'='*40}")
     print("  Cominciamo a pulire i dataset  ")
     print(f"{'='*40}")
-    traffic_volume_pulizia(path_traffic_volume)
-    # vehicle_collision_pulizia(path_vehicle_collision)
+    #traffic_volume_pulizia(path_traffic_volume)
+    vehicle_collision_pulizia(path_vehicle_collision)
     # taxi_pulizia(path_taxi)
     # meteo_pulizia(path_meteo)

@@ -131,7 +131,7 @@ def crea_db():
             accident_date DATE,
             accident_time VARCHAR2(10),
             borough VARCHAR2(50),
-            zip_code VARCHAR2(10),
+            zip_code VARCHAR2(50),
             latitude DECIMAL(10,7),
             longitude DECIMAL(10,7),
             on_street_name VARCHAR2(100),
@@ -177,7 +177,7 @@ def crea_db():
             segment_id INT,
             street VARCHAR2(100),
             from_st VARCHAR2(100),
-            to_st VARCHAR2(100),
+            to_st VARCHAR2(150),
             direction VARCHAR2(10)
         )
         """,
@@ -188,17 +188,17 @@ def crea_db():
             pickup_datetime TIMESTAMP,
             dropoff_datetime TIMESTAMP,
             passenger_count INT,
-            trip_distance DECIMAL(8,2),
+            trip_distance DECIMAL(12,2),
             pickup_longitude DECIMAL(10,7),
             pickup_latitude DECIMAL(10,7),
             dropoff_longitude DECIMAL(10,7),
             dropoff_latitude DECIMAL(10,7),
             ratecode_id INT,
             payment_type INT,
-            fare_amount DECIMAL(8,2),
-            tip_amount DECIMAL(8,2),
-            tolls_amount DECIMAL(8,2),
-            total_amount DECIMAL(8,2)
+            fare_amount DECIMAL(12,2),
+            tip_amount DECIMAL(12,2),
+            tolls_amount DECIMAL(12,2),
+            total_amount DECIMAL(12,2)
         )
         """,
         """
@@ -245,4 +245,5 @@ def crea_db():
         cursor.close()           
         conn.close()
 
-crea_db()
+if __name__ == '__main__':
+    crea_db()

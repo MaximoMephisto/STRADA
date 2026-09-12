@@ -22,9 +22,9 @@ def connessione_al_db():
             wallet_location=WALLET_PATH,
             wallet_password=WALLET_PASSWORD
         )
-        
-        print("Connessione al database avvenuta con successo!")
+
         return conn
+    
     except oracledb.Error as e:
         print("Errore durante la connessione al database:", e)
         return None
