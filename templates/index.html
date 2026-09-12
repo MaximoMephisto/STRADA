@@ -5,10 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>S.T.R.A.D.A</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-
+    <link rel="stylesheet" href="../static/css/style.css">
 </head>
 
 <body>
@@ -22,36 +25,24 @@
             <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar"
                 aria-labelledby="offcanvasNavbarLabel">
                 <div class="offcanvas-header">
-                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Offcanvas</h5>
+                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">S.T.R.A.D.A</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
                 <div class="offcanvas-body">
                     <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="#">Home</a>
+                            <a class="nav-link" href="#main">Chi siamo</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Link</a>
+                            <a class="nav-link" href="#contatto">Contatto</a>
                         </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                                aria-expanded="false">
-                                Dropdown
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#">Action</a></li>
-                                <li><a class="dropdown-item" href="#">Another action</a></li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li><a class="dropdown-item" href="#">Something else here</a></li>
-                            </ul>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Area clienti</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#main">Domande frequenti</a>
                         </li>
                     </ul>
-                    <form class="d-flex mt-3" role="search">
-                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-                        <button class="btn btn-outline-success" type="submit">Search</button>
-                    </form>
                 </div>
             </div>
         </div>
@@ -59,9 +50,130 @@
     <div class="container">
         <div class="row">
             <div class="col-12 col-sm-12">
-                <div class="text-center mt-5 pt-5">
+                <div class="text-center mt-5 pt-5 title-center">
                     <h1 class="mt-5 fw-bold">S.T.R.A.D.A</h1>
                     <p class="lead fw-bold">Sistema Trafficologico di Rilievo e Analisi Dati Associati</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 col-sm-6">
+                    <div class="card card-perso">
+                        <div class="card-body">
+                            <h5 class="card-title">Chi siamo</h5>
+                            <h6 class="card-subtitle mb-2 text-body-secondary">L'architettura tecnologica dietro la
+                                mobilità del futuro.</h6>
+                            <p class="card-text">
+                                S.T.R.A.D.A. (Sistema Trafficologico di Rilievo e Analisi Dati Associati) nasce
+                                dall’unione tra ingegneria dei
+                                trasporti e data science d'avanguardia. Siamo un team di specialisti dedicati a
+                                trasformare la complessità
+                                urbana in flussi di informazioni lineari e azionabili. Crediamo che una città
+                                intelligente non sia quella che
+                                produce più dati, ma quella che sa come connetterli per migliorare la vita dei suoi
+                                cittadini. S.T.R.A.D.A. è
+                                la nostra risposta alle sfide infrastrutturali delle più grandi metropoli del mondo.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6"></div>
+                <div class="col-12 col-sm-6"></div>
+                <div class="col-12 col-sm-6 mt-3">
+                    <div class="card card-perso">
+                        <div class="card-body">
+                            <h5 class="card-title">Cosa Facciamo</h5>
+                            <h6 class="card-subtitle mb-2 text-body-secondary">Abbattiamo i silos di dati per unificare
+                                la gestione della città.</h6>
+                            <p class="card-text">
+                                Il nostro servizio risolve il problema frammentario delle amministrazioni moderne
+                                integrando in un’unica piattaforma
+                                cloud le fonti informative di dipartimenti separati. <br>
+                                Integrazione Totale: Connettiamo in tempo reale i dati dei flussi dei taxi e
+                                ride-sharing, le reti di sensori stradali,
+                                i report in tempo reale degli incidenti della NYPD e le metriche delle centraline meteo.
+                                <br>
+                                Normalizzazione Tecnologica: Superiamo l'incompatibilità tra vecchi e nuovi software,
+                                traducendo
+                                formati di dati eterogenei in un unico linguaggio standardizzato. <br>
+                                Calcolo dell'Indice Unico: Elaboriamo miliardi di punti dati per generare un Indice di
+                                Efficienza Unico (IEU), offrendo
+                                una panoramica immediata dello stato della viabilità urbana.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 mt-3">
+                    <div class="card card-perso">
+                        <div class="card-body">
+                            <h5 class="card-title">I Nostri Valori</h5>
+                            <p class="card-text">
+                                Integrazione: Rifiutiamo l'isolamento tecnologico; crediamo nel valore della
+                                cooperazione tra sistemi e dipartimenti. <br>
+                                Efficienza Data-Driven: Sostituiamo le decisioni basate sull'intuizione con strategie
+                                validate da dati matematici ed
+                                evidenze empiriche. <br>
+                                Sostenibilità Urbana: Ottimizzare il traffico significa ridurre i tempi di attesa, i
+                                consumi di carburante e l’impatto
+                                ambientale della flotta cittadina.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6"></div>
+                <div class="col-12 col-sm-6"></div>
+                <div class="col-12 col-sm-6 mt-3">
+                    <div class="card card-perso">
+                        <div class="card-body">
+                            <h5 class="card-title">Domande Frequenti (FAQ)</h5>
+                            <p class="card-text">
+                                I dipartimenti devono cambiare i loro software attuali? <br>
+                                No. S.T.R.A.D.A. agisce come uno strato software superiore (middleware). Tramite API
+                                avanzate, si collega ai sistemi già
+                                in uso senza interrompere il lavoro quotidiano dei dipartimenti. <br>
+                                Come viene calcolato l'Indice di Efficienza Unico? <br>
+                                L'indice incrocia variabili come la velocità media dei taxi, la densità dei sensori
+                                stradali, la gravità degli incidenti
+                                segnalati e le condizioni meteo avverse, restituendo un valore numerico facilmente
+                                interpretabile. <br>
+                                La piattaforma gestisce dati sensibili della privacy dei cittadini? <br>
+                                No. Tutti i dati raccolti (comprese le tracce GPS dei taxi o le segnalazioni NYPD)
+                                vengono rigorosamente anonimizzati e
+                                aggregati prima dell'elaborazione, nel pieno rispetto delle normative sulla privacy.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="contatto">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 col-sm-12 m-5 ">
+                    <div class="text-center">
+                        <h1 class="mt-5 fw-bold">Contattaci</h1>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 mb-3">
+                    <div class="card card-perso p-3">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="exampleFormControlInput1" class="form-label">Email address</label>
+                                <input type="email" class="form-control" id="exampleFormControlInput1"
+                                    placeholder="name@example.com">
+
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleFormControlTextarea1" class="form-label">Example textarea</label>
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>

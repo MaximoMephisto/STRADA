@@ -8,3 +8,7 @@ __pycache__/
 # Ignora i file di configurazione locali
 .venv/
 .vscode/
+
+# Ignora le credenziali e i dati del database
+DDBB/Wallet_STRADA/
+DDBB/connessione.py
