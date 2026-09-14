@@ -1,4 +1,4 @@
-body {
+#index {
     background-image: url('../img/background.jpg');
     background-size: cover;        
     background-position: center;   
@@ -6,7 +6,7 @@ body {
     background-attachment: fixed;  
     margin: 0;
     padding: 0;
-    min-height: 100vh;            
+    min-height: 100vh;    
 }
 
 .title-center {
@@ -16,4 +16,8 @@ body {
 .card-perso {
     background: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
+}
+
+#analisi {
+    background-color: rgba(128, 128, 128, 0.438);
 }

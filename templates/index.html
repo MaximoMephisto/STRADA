@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="../static/css/style.css">
 </head>
 
-<body>
+<body id="index">
     <nav class="navbar bg-body-tertiary fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">HOME</a>
@@ -125,7 +125,7 @@
                 </div>
                 <div class="col-12 col-sm-6"></div>
                 <div class="col-12 col-sm-6"></div>
-                <div class="col-12 col-sm-6 mt-3">
+                <div class="col-12 col-sm-6 mt-3 mb-5">
                     <div class="card card-perso">
                         <div class="card-body">
                             <h5 class="card-title">Domande Frequenti (FAQ)</h5>
@@ -150,6 +150,89 @@
             </div>
         </div>
     </div>
+    <div id="analisi">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="text-center mt-5">
+                    <h1 class="fw-bold text-white">ANALISI NYC partendo dal {{ anno }}</h1>
+                </div>
+                <div class="col-12 col-sm-4 mt-5">
+                    <div class="card card-perso">
+                        <div class="card-body">
+                            <h5 class="card-title">Statistiche Incidenti</h5>
+                            <h6 class="card-subtitle mb-2 text-body-secondary">Analisi collisioni stradali a NYC.
+                            </h6>
+                            <p class="card-text">
+                                Attualmente nel database sono registrati <strong>{{ numero_incidenti }}</strong>
+                                incidenti stradali pronti per l'analisi.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-4 mt-5">
+                    <div class="card card-perso">
+                        <div class="card-body">
+                            <h5 class="card-title">Volumi di Traffico</h5>
+                            <h6 class="card-subtitle mb-2 text-body-secondary">Rilevazioni automatizzate dei flussi.
+                            </h6>
+                            <p class="card-text">
+                                Il database ospita <strong>{{ numero_traffico }}</strong> record relativi ai
+                                conteggi del traffico stradale.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-4 mt-5">
+                    <div class="card card-perso">
+                        <div class="card-body">
+                            <h5 class="card-title">Tasso di mortalita</h5>
+                            <h6 class="card-subtitle mb-2 text-body-secondary">Calcolo del percentuale della tassa
+                                di mortalita.
+                            </h6>
+                            <p class="card-text">
+                                Il tasso di mortalita e del <strong>{{ tasso_mortalita }}</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-4 mt-5">
+                    <div class="card card-perso">
+                        <div class="card-body">
+                            <h5 class="card-title">Causa principale</h5>
+                            <h6 class="card-subtitle mb-2 text-body-secondary">Ricerca della causa principale degli
+                                incidenti.
+                            </h6>
+                            <p class="card-text">
+                                La causa principale di inciendi in NYC e: <strong>{{ causa_top }}</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-4 mt-5">
+                    <div class="card card-perso">
+                        <div class="card-body">
+                            <h5 class="card-title">Quantita di incidenti per causa principale</h5>
+                            <h6 class="card-subtitle mb-2 text-body-secondary">Quantita di incidenti avenuti per {{
+                                causa_top }}.
+                            </h6>
+                            <p class="card-text">
+                                La quantita di incidenti e di <strong>{{ incidenti_causa }}</strong>.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-4 mt-5 mb-5 pb-5">
+                    <div class="card card-perso">
+                        <div class="card-body">
+                            <h5 class="card-title">Incidenti avenuti con maltempo</h5>
+                            <h6 class="card-subtitle mb-2 text-body-secondary">Quantita di incidenti avenuti con la
+                                neve in NYC.
+                            </h6>
+                            <p class="card-text">
+                                La quantita di incidenti e di <strong>{{ incidenti_con_neve }}</strong>.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div id="contatto">
         <div class="container">
             <div class="row">
@@ -168,11 +251,12 @@
 
                             </div>
                             <div class="mb-3">
-                                <label for="exampleFormControlTextarea1" class="form-label">Example textarea</label>
-                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                                <label for="exampleFormControlTextarea1" class="form-label">Example
+                                    textarea</label>
+                                <textarea class="form-control" id="exampleFormControlTextarea1"
+                                    rows="3"></textarea>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>

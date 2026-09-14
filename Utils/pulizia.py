@@ -3,6 +3,7 @@ from tqdm import tqdm
 import os
 from timeit import default_timer as timer
 import numpy as np
+import csv
 
 path_traffic_volume = 'Dati_Originali/Automated_Traffic_Volume_Counts.csv'
 path_vehicle_collision = 'Dati_Originali/INCIDENTI/nypd-motor-vehicle-collisions.csv'
@@ -46,7 +47,7 @@ def traffic_volume_pulizia(dataset):
     if os.path.exists(dataset_output):
         os.remove(dataset_output)  
     
-    blocchi = pd.read_csv(dataset, chunksize=dimensione_blocco)
+    blocchi = pd.read_csv(dataset, chunksize=dimensione_blocco, low_memory=False)
     
     with tqdm(desc='Blocchi elaborati', unit=' blocco') as pbar:
         for blocco in blocchi:
@@ -54,9 +55,11 @@ def traffic_volume_pulizia(dataset):
             blocco = blocco.dropna(subset=['fromSt', 'toSt', 'WktGeom', 'SegmentID'])
             
             # Ottimizza i testi (es. tutto in maiuscolo e senza spazi vuoti inutili)
-            for colomna in ['street', 'fromSt', 'toSt']:
-                blocco[colomna] = blocco[colomna].astype(str).str.upper().str.strip()
-                
+            colonne_testo = ['street', 'fromSt', 'toSt']
+            for col in colonne_testo:
+                if col in blocco.columns:
+                    blocco[col] = blocco[col].astype("string").str.upper().str.strip()
+             
             # Elimina i duplicati all'interno del blocco basandosi sulla colonna 'SegmentID'
             blocco = blocco.drop_duplicates()
             
@@ -76,52 +79,65 @@ def traffic_volume_pulizia(dataset):
 def vehicle_collision_pulizia(dataset):
     tempo_inizio = timer()
     
-    df = pd.read_csv(dataset, dtype={'ZIP CODE': str})
+    df = pd.read_csv(dataset, dtype={'ZIP CODE': str, 'COLLISION_ID': str})
     
     dataset_output = 'Dati_Puliti/nypd-motor-vehicle-collisions_pulito.csv'
     # Rimuove il file di output se esiste già
     if os.path.exists(dataset_output):
         os.remove(dataset_output)  
     
-    # Fa una somma dei dati null per ogni colonna e stampa il risultato
-    date_nulli = df['ACCIDENT DATE'].isnull().sum()
-    time_nulli = df['ACCIDENT TIME'].isnull().sum()
-    borough_nulli = df['BOROUGH'].isnull().sum()
-    zip_nulli = df['ZIP CODE'].isnull().sum()
-            
-    df["ACCIDENT DATE"] = pd.to_datetime(df["ACCIDENT DATE"]).dt.date
-
-    df["BOROUGH"] = df["BOROUGH"].fillna("Non disponibile")
-
-    df["ZIP CODE"] = df["ZIP CODE"].astype("string")
-
-    df["ZIP CODE"] = df["ZIP CODE"].fillna("Non disponibile")
-
-    df["NUMBER OF PERSONS INJURED"] = df["NUMBER OF PERSONS INJURED"].astype("Int64")
-    df["NUMBER OF PERSONS KILLED"] = df["NUMBER OF PERSONS KILLED"].astype("Int64")
-    df["NUMBER OF PEDESTRIANS INJURED"] = df["NUMBER OF PEDESTRIANS INJURED"].astype("Int64")
-    df["NUMBER OF PEDESTRIANS KILLED"] = df["NUMBER OF PEDESTRIANS KILLED"].astype("Int64")
-    df["NUMBER OF CYCLIST INJURED"] = df["NUMBER OF CYCLIST INJURED"].astype("Int64")
-    df["NUMBER OF CYCLIST KILLED"] = df["NUMBER OF CYCLIST KILLED"].astype("Int64")
-    df["NUMBER OF MOTORIST INJURED"] = df["NUMBER OF MOTORIST INJURED"].astype("Int64")
-    df["NUMBER OF MOTORIST KILLED"] = df["NUMBER OF MOTORIST KILLED"].astype("Int64")
-
-    df["Location_Status"] = df.apply(lambda r: "Coordinate disponibili"
-        if pd.notna(r["LATITUDE"]) and pd.notna(r["LONGITUDE"])
-        else "Coordinate non disponibili",
-        axis=1
+    colonne_numeriche = [
+        "NUMBER OF PERSONS INJURED", "NUMBER OF PERSONS KILLED",
+        "NUMBER OF PEDESTRIANS INJURED", "NUMBER OF PEDESTRIANS KILLED",
+        "NUMBER OF CYCLIST INJURED", "NUMBER OF CYCLIST KILLED",
+        "NUMBER OF MOTORIST INJURED", "NUMBER OF MOTORIST KILLED"
+    ]
+    df[colonne_numeriche] = df[colonne_numeriche].fillna(0).astype("Int64")
+    
+    # In caso di nulli mettiamo 'non definito'
+    df["ACCIDENT DATE"] = pd.to_datetime(df["ACCIDENT DATE"], errors='coerce')
+    df["ACCIDENT TIME"] = df["ACCIDENT TIME"].fillna("Non definito")
+    df["BOROUGH"] = df["BOROUGH"].fillna("Non definito").str.upper()
+    df["ZIP CODE"] = df["ZIP CODE"].fillna("Non definito")
+    
+    # Informazioni principali sulla dinamica (Veicoli e cause primarie)
+    df["CONTRIBUTING FACTOR VEHICLE 1"] = df["CONTRIBUTING FACTOR VEHICLE 1"].fillna("Non definito").str.upper()
+    df["CONTRIBUTING FACTOR VEHICLE 2"] = df["CONTRIBUTING FACTOR VEHICLE 2"].fillna("Non definito").str.upper()
+    df["VEHICLE TYPE CODE 1"] = df["VEHICLE TYPE CODE 1"].fillna("Non definito").str.upper()
+    df["VEHICLE TYPE CODE 2"] = df["VEHICLE TYPE CODE 2"].fillna("Non definito").str.upper()
+    
+    # Stato delle coordinate geografiche
+    df["Location_Status"] = np.where(
+        df["LATITUDE"].notna() & df["LONGITUDE"].notna(), 
+        "Coordinate disponibili", 
+        "Coordinate non disponibili"
     )
-
-    df = df.drop(columns=["LOCATION"])
+    
+    # Elimina i dati non importanti
+    colonne_da_tenere = [
+        'COLLISION_ID', 'ACCIDENT DATE', 'ACCIDENT TIME', 'BOROUGH', 'ZIP CODE', 
+        'LATITUDE', 'LONGITUDE', 'Location_Status',
+        'CONTRIBUTING FACTOR VEHICLE 1', 'CONTRIBUTING FACTOR VEHICLE 2',
+        'VEHICLE TYPE CODE 1', 'VEHICLE TYPE CODE 2'
+    ] + colonne_numeriche
+    
+    # Filtriamo il DataFrame: eliminerà automaticamente strade secondarie, veicoli 3-4-5 e colonne F39, F40 ecc.
+    df = df[[col for col in colonne_da_tenere if col in df.columns]]
+    
+    # Rimuove duplicati basandosi sull'ID scontro
     df = df.drop_duplicates(subset=['COLLISION_ID'], keep='first')
     
-    df.to_csv(dataset_output, index=False)
+    # Per problemi con TABLEAU, si salva con rinforzo
+    df.to_csv(
+        dataset_output, 
+        index=False, 
+        lineterminator='\n'
+    )
     
     tempo_fine = timer()
-    tempo_totale = tempo_fine - tempo_inizio
-
-    print(f"\nvehicle_collision_pulizia completata. Il dataset pulito è stato salvato in {dataset_output}.")
-    print(f"Tempo totale: {tempo_totale:.2f} secondi per {len(df)} righe.")
+    print(f"\nPulizia completata con successo! Il file leggero è in: {dataset_output}")
+    print(f"Sono rimaste {df.shape[1]} colonne pulite e {len(df)} righe.")
+    print(f"Tempo impiegato: {tempo_fine - tempo_inizio:.2f} secondi.")
 
 
 def taxi_pulizia(dataset):
@@ -140,10 +156,10 @@ def taxi_pulizia(dataset):
         for blocco in blocchi:
             # Converte le colonne 'tpep_pickup_datetime' e 'tpep_dropoff_datetime' in formato datetime, gestendo eventuali errori
             blocco["tpep_pickup_datetime"] = pd.to_datetime(
-                blocco["tpep_pickup_datetime"], errors="coerce", cache=True
+                blocco["tpep_pickup_datetime"], errors="coerce", format="mixed"
             )
             blocco["tpep_dropoff_datetime"] = pd.to_datetime(
-                blocco["tpep_dropoff_datetime"], errors="coerce", cache=True
+                blocco["tpep_dropoff_datetime"], errors="coerce", format="mixed"
             )
             
             # Converte le colonne numeriche in formato numerico
@@ -253,10 +269,10 @@ if __name__ == "__main__":
     print("Dataset: NYC_Central_Park_weather_1869-2022.csv")
     mostra_dataset(path_meteo)
 
-    print(f"{'='*40}")
+    print(f"{'='*40}") 
     print("  Cominciamo a pulire i dataset  ")
     print(f"{'='*40}")
-    #traffic_volume_pulizia(path_traffic_volume)
+    traffic_volume_pulizia(path_traffic_volume)
     vehicle_collision_pulizia(path_vehicle_collision)
-    # taxi_pulizia(path_taxi)
-    # meteo_pulizia(path_meteo)
+    taxi_pulizia(path_taxi)
+    meteo_pulizia(path_meteo)
