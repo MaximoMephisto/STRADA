@@ -1,17 +1,63 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 from DDBB.connessione import connessione_al_db
-import oracledb
+import json
+import plotly.express as px
+import plotly.utils
+import bcrypt
+
+
 # Crea un'istanza dell'app Flask
 app = Flask(__name__)
-# Definisci una route per la home page
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username').strip()
+        passwd = request.form.get('passwd')
+        
+        conn = connessione_al_db()
+        cursor = conn.cursor()
+        try:
+            # Cerchiamo l'hash della password per lo username inserito
+            sql = "SELECT passwd FROM ADMIN.admins WHERE LOWER(TRIM(username)) = LOWER(:1)"
+            cursor.execute(sql, (username,))
+            row = cursor.fetchone()
+            
+            # Se row è None, significa che l'utente non esiste nel database
+            if row is None:
+                print("Utente non trovato.")
+                # Mandiamo lo stesso errore generico per motivi di sicurezza
+                return render_template('login.html', errore="Username o password errati.")
+            
+            # Recuperiamo l'hash (che nel DB è salvato come stringa VARCHAR2)
+            hashed_password_db = row[0]
+            
+            # Convertiamo sia l'input in chiaro sia l'hash del DB in bytes
+            password_bytes = passwd.encode('utf-8')
+            hash_bytes = hashed_password_db.encode('utf-8')
+            
+            if bcrypt.checkpw(password_bytes, hash_bytes):
+                return redirect(url_for('index'))
+            else:
+                print("Password errata.")
+                return render_template('login.html', errore="Username o password errati.")
+                
+        except Exception as e:
+            print(f"Errore durante il login: {e}")
+            return "Errore interno del server", 500
+        finally:
+            cursor.close()
+            conn.close()
+
+    return render_template('login.html')
+
 @app.route('/')
 def index():
-    # Prendiamo i dati dal DB Oracle usando la connessione esistente
     with connessione_al_db() as connection:
         if connection is None:
             return "Errore di connessione al Database", 500
         
         with connection.cursor() as cursor:
+            # STATISTICHE GENERALE #
             # Trova l'anno MINIMO registrato nella tabella incidenti
             cursor.execute('SELECT EXTRACT(YEAR FROM MIN(accident_date)) FROM incidenti')
             anno_corrente = cursor.fetchone()[0]
@@ -33,8 +79,7 @@ def index():
             """)
             tasso_mortalita = cursor.fetchone()[0]
             tasso_mortalita_str = f"{tasso_mortalita}%".replace(".", ",") if tasso_mortalita is not None else "0,0%"
-
-            # --- 3. ANALISI AVANZATA B: Causa Principale (JOIN con incidenti_fattori) ---
+            
             # Incrocia le tabelle per trovare il fattore più comune escludendo i dati non definiti
             cursor.execute("""
             SELECT contributing_factor, COUNT(*)
@@ -46,7 +91,7 @@ def index():
             res_causa = cursor.fetchone()
             causa_top = res_causa[0].title() if res_causa else "Non disponibile"
             incidenti_causa = f"{res_causa[1]:,}".replace(",", ".") if res_causa else "0"
-            # --- 4. ANALISI AVANZATA C: Incrocio Meteo-Stradale (JOIN incidenti + meteo) ---
+            
             # Calcola quanti incidenti sono avvenuti nei giorni in cui c'era neve al suolo (> 0)
             cursor.execute("""
                 SELECT COUNT(*) 
@@ -67,7 +112,7 @@ def index():
         incidenti_causa=incidenti_causa,
         incidenti_con_neve=incidenti_con_neve
     )
-
+    
 if __name__ == '__main__':
     app.run(debug=True)
     

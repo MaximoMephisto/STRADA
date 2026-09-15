@@ -6,6 +6,7 @@ from tqdm import tqdm
 from connessione import connessione_al_db
 from timeit import default_timer as timer
 from crea_DB import crea_db
+import bcrypt
 
 file_traffico = 'Dati_puliti/Automated_Traffic_Volume_Counts_pulito.csv'
 file_meteo = 'Dati_puliti/NYC_Central_Park_weather_1869-2022.csv'
@@ -281,6 +282,48 @@ def inserimento_taxi(file, dimensione_blocco=20000):
     conn.close()
     print("Inserimento Taxi completato.")
 
+
+def inserimento_admin():
+    conn = connessione_al_db()
+    if conn is None:
+        print("Connessione al database fallita.")
+        return
+    
+    cursor = conn.cursor() 
+    USERNAME_ADMIN = "superadmin"
+    PASSWORD_CHIARO = "1234" 
+    TUTTI_PERMESSI = True 
+    
+    try:
+        salt = bcrypt.gensalt()
+        hashed_password = bcrypt.hashpw(PASSWORD_CHIARO.encode('utf-8'), salt).decode('utf-8')
+        
+        # 2. Conversione del permesso per Oracle (True -> 1)
+        permesso_int = 1 if TUTTI_PERMESSI else 0
+        
+        # 3. Query di inserimento sicuro
+        sql = """
+            INSERT INTO admins (username, passwd, tutti_permessi) 
+            VALUES (:1, :2, :3)
+        """
+        
+        print(f"Inserimento dell'utente '{USERNAME_ADMIN}' nel database Oracle...")
+        cursor.execute(sql, (USERNAME_ADMIN, hashed_password, permesso_int))
+        
+        # 4. Commit forzato per salvare i dati
+        conn.commit()
+        print(f"Username: {USERNAME_ADMIN}")
+        print(f"Password originale: {PASSWORD_CHIARO}")
+        print(f"Hash salvato: {hashed_password[:20]}...")
+        print("="*45)
+    except Exception as e:
+        print(f"\n[!] Errore imprevisto durante il lancio: {e}")
+        conn.rollback()
+    finally:
+        cursor.close()
+        conn.close()
+    
+    
 if __name__ == "__main__":
     print("================================")
     print("Inizio dell'inserimento dei dati")
@@ -324,6 +367,10 @@ if __name__ == "__main__":
         tempo_taxi = t_taxi_fine - t_taxi_inizio
         print(f"-> Taxi inseriti in: {tempo_taxi:.2f} secondi.")
         print("------------------------------")
+        
+        print("Inserendo superadmin..")
+        inserimento_admin()
+        print("Admin inserito correttamente.")
         
         tempo_fine = timer() 
         tempo_totale = tempo_fine - tempo_inizio 

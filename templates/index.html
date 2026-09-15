@@ -11,7 +11,7 @@
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
         crossorigin="anonymous"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/css/style.css"> <!-- Indirizzo CSS per verifiche locali estetiche -->
 </head>
 
 <body id="index">
@@ -233,28 +233,36 @@
             </div>
         </div>
     </div>
-    <div id="contatto">
+    <div id="registro" class="my-4">
         <div class="container">
             <div class="row">
-                <div class="col-12 col-sm-12 m-5 ">
-                    <div class="text-center">
-                        <h1 class="mt-5 fw-bold">Contattaci</h1>
-                    </div>
-                </div>
-                <div class="col-12 col-sm-6 mb-3">
-                    <div class="card card-perso p-3">
+                <div class="col-12 col-sm-12">
+                    <div class="card card-perso">
                         <div class="card-body">
-                            <div class="mb-3">
-                                <label for="exampleFormControlInput1" class="form-label">Email address</label>
-                                <input type="email" class="form-control" id="exampleFormControlInput1"
-                                    placeholder="name@example.com">
-
-                            </div>
-                            <div class="mb-3">
-                                <label for="exampleFormControlTextarea1" class="form-label">Example
-                                    textarea</label>
-                                <textarea class="form-control" id="exampleFormControlTextarea1"
-                                    rows="3"></textarea>
+                            <div class="card-title">Creare administratore</div>
+                            <div class="col-12 col-sm-6">
+                                <form action="/login" method="post">
+                                    <div class="col-12 mb-3">
+                                        <label for="username" class="form-label">Username</label>
+                                        <input type="text" class="form-control" id="username" name="username"
+                                            placeholder="username_7" required
+                                    <div class="col-12 mb-3">
+                                        <label for="passwd" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="passwd" name="passwd"
+                                            placeholder="YourPassword123" required>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label for="tutti_permessi" class="form-label">Permessi</label>
+                                        <select class="form-select" id="tutti_permessi" name="tutti_permessi" required>
+                                            <option value="" disabled selected>Tipologia di permessi...</option>
+                                            <option value="1">Tutti i permessi</option>
+                                            <option value="0">Permessi limitati</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 mb-3 text-end">
+                                        <button type="submit" class="btn btn-secondary">Registra</button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
