@@ -12,3 +12,6 @@ __pycache__/
 # Ignora le credenziali e i dati del database
 DDBB/Wallet_STRADA/
 DDBB/connessione.py
+
+# Ignora tutti i dati di tipo TWB
+*.twb

@@ -97,8 +97,8 @@ def vehicle_collision_pulizia(dataset):
     # In caso di nulli mettiamo 'non definito'
     df["ACCIDENT DATE"] = pd.to_datetime(df["ACCIDENT DATE"], errors='coerce')
     df["ACCIDENT TIME"] = df["ACCIDENT TIME"].fillna("Non definito")
-    df["BOROUGH"] = df["BOROUGH"].fillna("Non definito").str.upper()
-    df["ZIP CODE"] = df["ZIP CODE"].fillna("Non definito")
+    df["BOROUGH"] = df["BOROUGH"].str.strip().str.upper()
+    df["ZIP CODE"] = df["ZIP CODE"].str.strip()
     
     # Informazioni principali sulla dinamica (Veicoli e cause primarie)
     df["CONTRIBUTING FACTOR VEHICLE 1"] = df["CONTRIBUTING FACTOR VEHICLE 1"].fillna("Non definito").str.upper()

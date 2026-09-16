@@ -22,7 +22,6 @@ def inserimento_incidenti(file, dimensione_blocco=20_000):
     
     cursor = conn.cursor()
     
-    # A differenza di MySQL, Oracle utilizza :[posizione partendo da 1] al posto di '%s'
     query_incidenti = """
     INSERT INTO incidenti (
         id_incidente, accident_date, accident_time, borough, zip_code,
@@ -36,11 +35,11 @@ def inserimento_incidenti(file, dimensione_blocco=20_000):
     query_veicoli = "INSERT INTO incidenti_veicoli (id_incidente, vehicle_type) VALUES (:1, :2)"
     
     lista_incidenti, lista_fattori, lista_veicoli = [], [], []
+    id_incidenti_visti = set()  # Controllo degli ID unici
     
-    # Funzione di inserimento
-    def svuota_envia():
+    def svuota_e_invia():
         if not lista_incidenti:
-            return
+            return True
         
         try:
             cursor.executemany(query_incidenti, lista_incidenti)
@@ -49,13 +48,12 @@ def inserimento_incidenti(file, dimensione_blocco=20_000):
             if lista_veicoli: 
                 cursor.executemany(query_veicoli, lista_veicoli)
             conn.commit()
-        
+            return True
         except Exception as e:
-            print(f"Errore al cercare di inserire i dati: {e}")
+            print(f"\n[ERRORE CRITICO] Errore durante l'inserimento degli incidenti: {e}")
             conn.rollback()
-
+            return False
         finally:
-            # Una volta raggiunti i 20_000 dati, si svuota per evitare duplicati
             lista_incidenti.clear()
             lista_fattori.clear()
             lista_veicoli.clear()
@@ -66,44 +64,49 @@ def inserimento_incidenti(file, dimensione_blocco=20_000):
         for riga in lettore:
             id_inc = int(riga['COLLISION_ID'])
 
+            if id_inc in id_incidenti_visti:
+                continue
+            id_incidenti_visti.add(id_inc)
+
             lista_incidenti.append((
                 id_inc, 
-                riga['ACCIDENT DATE'], 
-                riga['ACCIDENT TIME'], 
-                riga['BOROUGH'], 
-                riga['ZIP CODE'],
-                float(riga['LATITUDE']) if riga['LATITUDE'] else None,
-                float(riga['LONGITUDE']) if riga['LONGITUDE'] else None,
-                riga['ON STREET NAME'], 
-                riga['CROSS STREET NAME'], 
-                riga['OFF STREET NAME'],
-                int(riga['NUMBER OF PERSONS INJURED']) if riga['NUMBER OF PERSONS INJURED'] else 0, 
-                int(riga['NUMBER OF PERSONS KILLED']) if riga['NUMBER OF PERSONS KILLED'] else 0,
-                int(riga['NUMBER OF PEDESTRIANS INJURED']) if riga['NUMBER OF PEDESTRIANS INJURED'] else 0, 
-                int(riga['NUMBER OF PEDESTRIANS KILLED']) if riga['NUMBER OF PEDESTRIANS KILLED'] else 0,
-                int(riga['NUMBER OF CYCLIST INJURED']) if riga['NUMBER OF CYCLIST INJURED'] else 0, 
-                int(riga['NUMBER OF CYCLIST KILLED']) if riga['NUMBER OF CYCLIST KILLED'] else 0,
-                int(riga['NUMBER OF MOTORIST INJURED']) if riga['NUMBER OF MOTORIST INJURED'] else 0, 
-                int(riga['NUMBER OF MOTORIST KILLED']) if riga['NUMBER OF MOTORIST KILLED'] else 0
+                riga.get('ACCIDENT DATE'), 
+                riga.get('ACCIDENT TIME'), 
+                riga.get('BOROUGH'), 
+                riga.get('ZIP CODE'),
+                float(riga['LATITUDE']) if riga.get('LATITUDE') and riga['LATITUDE'].strip() else None,
+                float(riga['LONGITUDE']) if riga.get('LONGITUDE') and riga['LONGITUDE'].strip() else None,
+                riga.get('ON STREET NAME'), 
+                riga.get('CROSS STREET NAME'), 
+                riga.get('OFF STREET NAME'),
+                int(riga['NUMBER OF PERSONS INJURED']) if riga.get('NUMBER OF PERSONS INJURED') and riga['NUMBER OF PERSONS INJURED'].strip() else 0, 
+                int(riga['NUMBER OF PERSONS KILLED']) if riga.get('NUMBER OF PERSONS KILLED') and riga['NUMBER OF PERSONS KILLED'].strip() else 0,
+                int(riga['NUMBER OF PEDESTRIANS INJURED']) if riga.get('NUMBER OF PEDESTRIANS INJURED') and riga['NUMBER OF PEDESTRIANS INJURED'].strip() else 0, 
+                int(riga['NUMBER OF PEDESTRIANS KILLED']) if riga.get('NUMBER OF PEDESTRIANS KILLED') and riga['NUMBER OF PEDESTRIANS KILLED'].strip() else 0,
+                int(riga['NUMBER OF CYCLIST INJURED']) if riga.get('NUMBER OF CYCLIST INJURED') and riga['NUMBER OF CYCLIST INJURED'].strip() else 0, 
+                int(riga['NUMBER OF CYCLIST KILLED']) if riga.get('NUMBER OF CYCLIST KILLED') and riga['NUMBER OF CYCLIST KILLED'].strip() else 0,
+                int(riga['NUMBER OF MOTORIST INJURED']) if riga.get('NUMBER OF MOTORIST INJURED') and riga['NUMBER OF MOTORIST INJURED'].strip() else 0, 
+                int(riga['NUMBER OF MOTORIST KILLED']) if riga.get('NUMBER OF MOTORIST KILLED') and riga['NUMBER OF MOTORIST KILLED'].strip() else 0
             ))
 
-            # Tenendo in considerazione le cinque columne riferite a le stesse cose,
-            # prende tutti i dati referenti
             for i in range(1, 6):
                 campo_fattore = f'CONTRIBUTING FACTOR VEHICLE {i}'
                 if riga.get(campo_fattore) and riga[campo_fattore].strip():
-                    lista_fattori.append((id_inc, riga[campo_fattore]))
+                    lista_fattori.append((id_inc, riga[campo_fattore].strip()))
 
             for i in range(1, 6):
                 campo_veicolo = f'VEHICLE TYPE CODE {i}'
                 if riga.get(campo_veicolo) and riga[campo_veicolo].strip():
-                    lista_veicoli.append((id_inc, riga[campo_veicolo]))
+                    lista_veicoli.append((id_inc, riga[campo_veicolo].strip()))
             
             if len(lista_incidenti) >= dimensione_blocco:
-                svuota_envia()
+                if not svuota_e_invia():
+                    print("Processo interrotto per errore.")
+                    cursor.close()
+                    conn.close()
+                    return
         
-        # Si svuota la funzione per gli ultimi record rimasugli
-        svuota_envia()
+        svuota_e_invia()
     
     cursor.close()
     conn.close()
@@ -127,13 +130,15 @@ def inserimento_meteo(file, dimensione_blocco=20000):
     lista_meteo = []
     
     def svuota_e_invia():
-        if not lista_meteo: return
+        if not lista_meteo: return True
         try:
             cursor.executemany(query_meteo, lista_meteo)
             conn.commit()
+            return True
         except Exception as e:
-            print(f"Errore al cercare di inserire i dati: {e}")
+            print(f"\n[ERRORE CRITICO] Errore durante l'inserimento dei dati meteo: {e}")
             conn.rollback()
+            return False
         finally:
             lista_meteo.clear()
 
@@ -141,16 +146,20 @@ def inserimento_meteo(file, dimensione_blocco=20000):
         lettore = csv.DictReader(f)
         for riga in lettore:
             lista_meteo.append((
-                float(riga['PRCP']) if riga['PRCP'] else None,
-                riga['DATE'], # Posizionato come secondo elemento per matchare il TO_DATE(:2)
-                float(riga['SNOW']) if riga['SNOW'] else None,
-                float(riga['SNWD']) if riga['SNWD'] else None,
-                float(riga['TMIN']) if riga['TMIN'] else None,
-                float(riga['TMAX']) if riga['TMAX'] else None
+                float(riga['PRCP']) if riga.get('PRCP') and riga['PRCP'].strip() else None,
+                riga['DATE'],
+                float(riga['SNOW']) if riga.get('SNOW') and riga['SNOW'].strip() else None,
+                float(riga['SNWD']) if riga.get('SNWD') and riga['SNWD'].strip() else None,
+                float(riga['TMIN']) if riga.get('TMIN') and riga['TMIN'].strip() else None,
+                float(riga['TMAX']) if riga.get('TMAX') and riga['TMAX'].strip() else None
             ))
             
             if len(lista_meteo) >= dimensione_blocco:
-                svuota_e_invia()
+                if not svuota_e_invia():
+                    print("Processo interrotto per errore.")
+                    cursor.close()
+                    conn.close()
+                    return
                 
         svuota_e_invia() 
     
@@ -167,10 +176,11 @@ def inserimento_traffico(file, dimensione_blocco=20000):
     
     cursor = conn.cursor()
     
+    # Sincronizzato con la nuova tabella volume_traffico (id_incidente al primo posto)
     query_traffico = """
         INSERT INTO volume_traffico (
-            request_id, boro, anno, mese, giorno, ora, minuto, volume, segment_id, street, from_st, to_st, direction
-        ) VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12, :13)
+            id_incidente, request_id, boro, anno, mese, giorno, ora, minuto, volume, segment_id, street, from_st, to_st, direction
+        ) VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12, :13, :14)
     """
     
     lista_traffico = []
@@ -182,7 +192,7 @@ def inserimento_traffico(file, dimensione_blocco=20000):
             conn.commit()
             return True
         except Exception as e:
-            print(f"\n[ERRORE CRITICO] Errore durante l'inserimento dei dati: {e}")
+            print(f"\n[ERRORE CRITICO] Errore durante l'inserimento del traffico: {e}")
             conn.rollback()
             return False 
         finally:
@@ -192,30 +202,29 @@ def inserimento_traffico(file, dimensione_blocco=20000):
         lettore = csv.DictReader(f)
         for riga in tqdm(lettore, desc="Caricamento Traffico"):
             lista_traffico.append((
-                int(riga['RequestID']) if riga['RequestID'] else None,
-                riga['Boro'],
-                int(riga['Yr']) if riga['Yr'] else None,
-                int(riga['M']) if riga['M'] else None,
-                int(riga['D']) if riga['D'] else None,
-                int(riga['HH']) if riga['HH'] else None,
-                int(riga['MM']) if riga['MM'] else None,
-                int(riga['Vol']) if riga['Vol'] else None,
-                int(riga['SegmentID']) if riga['SegmentID'] else None,
-                riga['street'],
-                riga['fromSt'],
-                riga['toSt'][:100] if riga['toSt'] else None, # 🔴 Protezione ORA-12899 aggiunta qui
-                riga['Direction']
+                None,  # id_incidente impostato come None iniziale
+                int(riga['RequestID']) if riga.get('RequestID') and riga['RequestID'].strip() else None,
+                riga.get('Boro'),
+                int(riga['Yr']) if riga.get('Yr') and riga['Yr'].strip() else None,
+                int(riga['M']) if riga.get('M') and riga['M'].strip() else None,
+                int(riga['D']) if riga.get('D') and riga['D'].strip() else None,
+                int(riga['HH']) if riga.get('HH') and riga['HH'].strip() else None,
+                int(riga['MM']) if riga.get('MM') and riga['MM'].strip() else None,
+                int(riga['Vol']) if riga.get('Vol') and riga['Vol'].strip() else None,
+                int(riga['SegmentID']) if riga.get('SegmentID') and riga['SegmentID'].strip() else None,
+                riga.get('street'),
+                riga.get('fromSt'),
+                riga['toSt'][:100] if riga.get('toSt') else None,
+                riga.get('Direction')
             ))
             
             if len(lista_traffico) >= dimensione_blocco:
-                # Se l'inserimento fallisce, interrompiamo il ciclo immediatamente
                 if not svuota_e_invia():
                     print("Processo interrotto per errore.")
                     cursor.close()
                     conn.close()
                     return
                 
-        # Invia l'ultimo blocco residuo
         svuota_e_invia()
         
     cursor.close()
@@ -231,24 +240,27 @@ def inserimento_taxi(file, dimensione_blocco=20000):
     
     cursor = conn.cursor()
     
+    # Sincronizzato con la nuova tabella taxi (id_incidente al primo posto)
     query_taxi = """
         INSERT INTO taxi (
-            vendor_id, pickup_datetime, dropoff_datetime, passenger_count, trip_distance,
+            id_incidente, vendor_id, pickup_datetime, dropoff_datetime, passenger_count, trip_distance,
             pickup_longitude, pickup_latitude, dropoff_longitude, dropoff_latitude,
             ratecode_id, payment_type, fare_amount, tip_amount, tolls_amount, total_amount
-        ) VALUES (:1, TO_TIMESTAMP(:2, 'YYYY-MM-DD HH24:MI:SS'), TO_TIMESTAMP(:3, 'YYYY-MM-DD HH24:MI:SS'), :4, :5, :6, :7, :8, :9, :10, :11, :12, :13, :14, :15)
+        ) VALUES (:1, :2, TO_TIMESTAMP(:3, 'YYYY-MM-DD HH24:MI:SS'), TO_TIMESTAMP(:4, 'YYYY-MM-DD HH24:MI:SS'), :5, :6, :7, :8, :9, :10, :11, :12, :13, :14, :15, :16)
     """
     
     lista_taxi = []
     
     def svuota_e_invia():
-        if not lista_taxi: return
+        if not lista_taxi: return True
         try:
             cursor.executemany(query_taxi, lista_taxi)
             conn.commit()
+            return True
         except Exception as e:
-            print(f"Errore al cercare di inserire i dati: {e}")
+            print(f"\n[ERRORE CRITICO] Errore durante l'inserimento dei taxi: {e}")
             conn.rollback()
+            return False
         finally:
             lista_taxi.clear()
 
@@ -256,25 +268,30 @@ def inserimento_taxi(file, dimensione_blocco=20000):
         lettore = csv.DictReader(f)
         for riga in lettore:
             lista_taxi.append((
-                int(float(riga['VendorID'])) if riga['VendorID'] else None,
-                riga['tpep_pickup_datetime'],
-                riga['tpep_dropoff_datetime'],
-                int(float(riga['passenger_count'])) if riga['passenger_count'] else None,
-                float(riga['trip_distance']) if riga['trip_distance'] else None,
-                float(riga['pickup_longitude']) if riga['pickup_longitude'] else None,
-                float(riga['pickup_latitude']) if riga['pickup_latitude'] else None,
-                float(riga['dropoff_longitude']) if riga['dropoff_longitude'] else None,
-                float(riga['dropoff_latitude']) if riga['dropoff_latitude'] else None,
-                int(float(riga['RatecodeID'])) if riga['RatecodeID'] else None,
-                int(float(riga['payment_type'])) if riga['payment_type'] else None,
-                float(riga['fare_amount']) if riga['fare_amount'] else None,
-                float(riga['tip_amount']) if riga['tip_amount'] else None,
-                float(riga['tolls_amount']) if riga['tolls_amount'] else None,
-                float(riga['total_amount']) if riga['total_amount'] else None
+                None,  # id_incidente impostato come None iniziale
+                int(float(riga['VendorID'])) if riga.get('VendorID') and riga['VendorID'].strip() else None,
+                riga.get('tpep_pickup_datetime'),
+                riga.get('tpep_dropoff_datetime'),
+                int(float(riga['passenger_count'])) if riga.get('passenger_count') and riga['passenger_count'].strip() else None,
+                float(riga['trip_distance']) if riga.get('trip_distance') and riga['trip_distance'].strip() else None,
+                float(riga['pickup_longitude']) if riga.get('pickup_longitude') and riga['pickup_longitude'].strip() else None,
+                float(riga['pickup_latitude']) if riga.get('pickup_latitude') and riga['pickup_latitude'].strip() else None,
+                float(riga['dropoff_longitude']) if riga.get('dropoff_longitude') and riga['dropoff_longitude'].strip() else None,
+                float(riga['dropoff_latitude']) if riga.get('dropoff_latitude') and riga['dropoff_latitude'].strip() else None,
+                int(float(riga['RatecodeID'])) if riga.get('RatecodeID') and riga['RatecodeID'].strip() else None,
+                int(float(riga['payment_type'])) if riga.get('payment_type') and riga['payment_type'].strip() else None,
+                float(riga['fare_amount']) if riga.get('fare_amount') and riga['fare_amount'].strip() else None,
+                float(riga['tip_amount']) if riga.get('tip_amount') and riga['tip_amount'].strip() else None,
+                float(riga['tolls_amount']) if riga.get('tolls_amount') and riga['tolls_amount'].strip() else None,
+                float(riga['total_amount']) if riga.get('total_amount') and riga['total_amount'].strip() else None
             ))
             
             if len(lista_taxi) >= dimensione_blocco:
-                svuota_e_invia()
+                if not svuota_e_invia():
+                    print("Processo interrotto per errore.")
+                    cursor.close()
+                    conn.close()
+                    return
                 
         svuota_e_invia()
         
@@ -298,10 +315,8 @@ def inserimento_admin():
         salt = bcrypt.gensalt()
         hashed_password = bcrypt.hashpw(PASSWORD_CHIARO.encode('utf-8'), salt).decode('utf-8')
         
-        # 2. Conversione del permesso per Oracle (True -> 1)
         permesso_int = 1 if TUTTI_PERMESSI else 0
         
-        # 3. Query di inserimento sicuro
         sql = """
             INSERT INTO admins (username, passwd, tutti_permessi) 
             VALUES (:1, :2, :3)
@@ -309,8 +324,6 @@ def inserimento_admin():
         
         print(f"Inserimento dell'utente '{USERNAME_ADMIN}' nel database Oracle...")
         cursor.execute(sql, (USERNAME_ADMIN, hashed_password, permesso_int))
-        
-        # 4. Commit forzato per salvare i dati
         conn.commit()
         print(f"Username: {USERNAME_ADMIN}")
         print(f"Password originale: {PASSWORD_CHIARO}")
@@ -341,7 +354,6 @@ if __name__ == "__main__":
         print(f"-> Incidenti inseriti in: {tempo_incidenti:.2f} secondi.") 
         print("------------------------------")
         
-        # 2. Inserimento Meteo
         print("Inserendo dati del meteo..")
         t_meteo_inizio = timer()
         inserimento_meteo(file_meteo)
@@ -350,7 +362,6 @@ if __name__ == "__main__":
         print(f"-> Meteo inserito in: {tempo_meteo:.2f} secondi.")
         print("------------------------------")
         
-        # 3. Inserimento Traffico
         print("Inserendo dati del traffico..")
         t_traff_inizio = timer()
         inserimento_traffico(file_traffico)
@@ -359,7 +370,6 @@ if __name__ == "__main__":
         print(f"-> Traffico inserito in: {tempo_traffico:.2f} secondi.")
         print("------------------------------")
         
-        # 4. Inserimento Taxi
         print("Inserendo dati dei taxi..")
         t_taxi_inizio = timer()
         inserimento_taxi(file_taxi)
@@ -368,10 +378,6 @@ if __name__ == "__main__":
         print(f"-> Taxi inseriti in: {tempo_taxi:.2f} secondi.")
         print("------------------------------")
         
-        print("Inserendo superadmin..")
-        inserimento_admin()
-        print("Admin inserito correttamente.")
-        
         tempo_fine = timer() 
         tempo_totale = tempo_fine - tempo_inizio 
         
@@ -379,5 +385,3 @@ if __name__ == "__main__":
     
     except Exception as e:
         print(f"Errore al cercare di inserire i dati: {e}")
-        
-

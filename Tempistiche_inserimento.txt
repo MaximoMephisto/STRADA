@@ -1,0 +1,57 @@
+===============================================================================
+                       S.T.R.A.D.A. - LOG DI CARICAMENTO
+===============================================================================
+
+[FASE 1] PULIZIA DATABASE (RESET TABELLE)
+-------------------------------------------------------------------------------
+  [OK] Eliminazione tabella: Incidenti_Fattori
+  [OK] Eliminazione tabella: Incidenti_Veicoli
+  [OK] Eliminazione tabella: Incidenti
+  [OK] Eliminazione tabella: Volume_Traffico
+  [OK] Eliminazione tabella: Taxi
+  [OK] Eliminazione tabella: Meteo
+-------------------------------------------------------------------------------
+Status: Tutte le 6 tabelle sono state rimosse con successo (100%).
+
+
+[FASE 2] CREAZIONE STRUTTURA DATABASE
+-------------------------------------------------------------------------------
+  [OK] Creazione tabella: Incidenti
+  [OK] Creazione tabella: Incidenti_Fattori
+  [OK] Creazione tabella: Incidenti_Veicoli
+  [OK] Creazione tabella: Volume_Traffico
+  [OK] Creazione tabella: Taxi
+  [OK] Creazione tabella: Meteo
+-------------------------------------------------------------------------------
+Status: Tutte le 6 tabelle sono state create con successo (100%).
+
+
+[FASE 3] POPOLAMENTO E INSERIMENTO DATI
+-------------------------------------------------------------------------------
+  • INCIDENTI
+    └─ Inserimento in corso...
+    └─ Status: COMPLETATO
+    └─ Tempo impiegato: 133.95 secondi (~2.2 min)
+
+  • METEO
+    └─ Inserimento in corso...
+    └─ Status: COMPLETATO
+    └─ Tempo impiegato: 1.87 secondi
+
+  • TRAFFICO
+    └─ Inserimento in corso... [27.184.943 record elaborati]
+    └─ Status: COMPLETATO
+    └─ Tempo impiegato: 1124.80 secondi (~18.7 min)
+
+  • TAXI
+    └─ Inserimento in corso...
+    └─ Status: COMPLETATO
+    └─ Tempo impiegato: 449.52 secondi (~7.5 min)
+
+
+===============================================================================
+                               RIEPILOGO FINALE
+===============================================================================
+  Status finale : Processo completato con successo (0 errori)
+  Tempo totale  : 1711.83 secondi (circa 28.5 minuti)
+===============================================================================

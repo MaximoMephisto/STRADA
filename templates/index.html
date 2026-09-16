@@ -17,7 +17,7 @@
 <body id="index">
     <nav class="navbar bg-body-tertiary fixed-top">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">HOME</a>
+            <a class="navbar-brand" href="#">Dashboard - {{ username }}</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
                 aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -34,13 +34,14 @@
                             <a class="nav-link" href="#main">Chi siamo</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#contatto">Contatto</a>
+                            <a class="nav-link" href="#analisi">I analisi</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Area clienti</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#main">Domande frequenti</a>
+                            <div class="text-end my-3">
+                                <a href="{{ url_for('logout') }}" class="btn btn-danger">
+                                    <i class="bi bi-box-arrow-right"></i> Esci (Logout)
+                                </a>
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -211,65 +212,137 @@
                         <div class="card-body">
                             <h5 class="card-title">Quantita di incidenti per causa principale</h5>
                             <h6 class="card-subtitle mb-2 text-body-secondary">Quantita di incidenti avenuti per {{
-                                causa_top }}.
-                            </h6>
+                                causa_top }}.</h6>
                             <p class="card-text">
                                 La quantita di incidenti e di <strong>{{ incidenti_causa }}</strong>.
+                            </p>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-sm-4 mt-5 mb-5 pb-5">
+
+                <!-- CARD: MALTEMPO -->
+                <div class="col-12 col-sm-4 mt-5">
                     <div class="card card-perso">
                         <div class="card-body">
                             <h5 class="card-title">Incidenti avenuti con maltempo</h5>
-                            <h6 class="card-subtitle mb-2 text-body-secondary">Quantita di incidenti avenuti con la
-                                neve in NYC.
-                            </h6>
+                            <h6 class="card-subtitle mb-2 text-body-secondary">Quantita di incidenti avenuti con la neve
+                                in NYC.</h6>
                             <p class="card-text">
                                 La quantita di incidenti e di <strong>{{ incidenti_con_neve }}</strong>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 mt-5 mb-5 pb-5">
+                    <div class="card card-perso">
+                        <div class="card-body">
+                            <h5 class="card-title">Zone di collisione principali</h5>
+                            <h6 class="card-subtitle mb-2 text-body-secondary">I tre quartieri con piu sinistri
+                                registrati.</h6>
+                            <p class="card-text">
+                                {% for boro in top_boroughs %}
+                                Il quartiere <strong>{{ boro[0] }}</strong> registra <strong>{{ boro[1] }}</strong>
+                                incidenti (Feriti: {{ boro[2] }}, Vittime: {{ boro[3] }}).<br>
+                                {% else %}
+                                Dati sulle zone non disponibili nel database.
+                                {% endfor %}
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    {% if permessi | int == 1 %}
     <div id="registro" class="my-4">
         <div class="container">
             <div class="row">
                 <div class="col-12 col-sm-12">
                     <div class="card card-perso">
                         <div class="card-body">
-                            <div class="card-title">Creare administratore</div>
-                            <div class="col-12 col-sm-6">
-                                <form action="/login" method="post">
-                                    <div class="col-12 mb-3">
-                                        <label for="username" class="form-label">Username</label>
-                                        <input type="text" class="form-control" id="username" name="username"
-                                            placeholder="username_7" required
-                                    <div class="col-12 mb-3">
-                                        <label for="passwd" class="form-label">Password</label>
-                                        <input type="password" class="form-control" id="passwd" name="passwd"
-                                            placeholder="YourPassword123" required>
-                                    </div>
-                                    <div class="col-12 mb-3">
-                                        <label for="tutti_permessi" class="form-label">Permessi</label>
-                                        <select class="form-select" id="tutti_permessi" name="tutti_permessi" required>
-                                            <option value="" disabled selected>Tipologia di permessi...</option>
-                                            <option value="1">Tutti i permessi</option>
-                                            <option value="0">Permessi limitati</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-12 mb-3 text-end">
-                                        <button type="submit" class="btn btn-secondary">Registra</button>
-                                    </div>
-                                </form>
+                            {% if successo %}
+                            <div class="alert alert-success" role="alert">
+                                {{ successo }}
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                            {% endif %}
+                            <div class="card-title">Creare amministratore</div>
+                            <div class="col-12">
+                                <div class="row">
+                                    <!-- ================= COLONNA SINISTRA: FORM ================= -->
+                                    <div class="col-12 col-sm-6">
+                                        <form action="/" method="post">
+                                            <div class="col-12 mb-3">
+                                                <label for="username" class="form-label">Username</label>
+                                                <input type="text" class="form-control" id="username" name="username"
+                                                    placeholder="username_7" required>
+                                            </div> <!-- CORRETTO: Chiuso il div dello username -->
+
+                                            <div class="col-12 mb-3">
+                                                <label for="passwd" class="form-label">Password</label>
+                                                <input type="password" class="form-control" id="passwd" name="passwd"
+                                                    placeholder="YourPassword123" required>
+                                            </div>
+
+                                            <div class="col-12 mb-3">
+                                                <label for="tutti_permessi" class="form-label">Permessi</label>
+                                                <select class="form-select" id="tutti_permessi" name="tutti_permessi"
+                                                    required>
+                                                    <option value="" disabled selected>Tipologia di permessi...</option>
+                                                    <option value="1">Tutti i permessi</option>
+                                                    <option value="0">Permessi limitati</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-12 mb-3 text-end">
+                                                <button type="submit" class="btn btn-secondary">Registra</button>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <!-- ================= COLONNA DESTRA: TABELLA ================= -->
+                                    <div class="col-12 col-sm-6">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover align-middle">
+                                                <thead class="table-dark">
+                                                    <tr>
+                                                        <th>ID</th>
+                                                        <th>Username</th>
+                                                        <th>Livello Permessi</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for row_admin in lista_admins %}
+                                                    <tr>
+                                                        <td><strong>{{ row_admin[0] }}</strong></td>
+                                                        <td>{{ row_admin[1] }}</td>
+                                                        <td>
+                                                            {% if row_admin[2] == 'Super Admin' %}
+                                                            <span class="badge bg-danger">Super Admin</span>
+                                                            {% else %}
+                                                            <span class="badge bg-secondary">Limitato</span>
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                    {% else %}
+                                                    <tr>
+                                                        <td colspan="3" class="text-center text-muted">Nessun
+                                                            amministratore trovato.</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div> <!-- Fine Colonna Destra -->
+
+                                </div> <!-- Fine Row interna -->
+                            </div> <!-- Fine Col-12 interna -->
+                        </div> <!-- Fine Card-Body -->
+                    </div> <!-- Fine Card -->
+                </div> <!-- Fine Col-12 esterna -->
+            </div> <!-- Fine Row esterna -->
+        </div> <!-- Fine Container (Aggiunto il tag di chiusura mancante) -->
     </div>
+    {% endif %}
 </body>
 
 </html>
